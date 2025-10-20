@@ -3,80 +3,72 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Circle
 from matplotlib.collections import LineCollection
 import numpy as np
-import time
+from streamlit_autorefresh import st_autorefresh
 
-# --- Constantes físicas ---
-g = 9.81
-radio_base = 0.18
-long_max = 6.0
-mass_max = 5.0
-
-# --- Streamlit layout ---
+# --- Configuración de Streamlit ---
 st.set_page_config(page_title="Simulador de Péndulo", layout="centered")
 st.title("🧭 Simulador Interactivo del Péndulo")
 st.write("Controla la longitud, el ángulo y la masa para ver cómo cambia el movimiento y el período.")
 
 # --- Controles laterales ---
-L = st.sidebar.slider("Longitud (m)", 0.5, long_max, 2.5)
+L = st.sidebar.slider("Longitud (m)", 0.5, 6.0, 2.5)
 angle_deg = st.sidebar.slider("Ángulo (°)", 5, 90, 20)
-mass = st.sidebar.slider("Masa (kg)", 0.1, mass_max, 1.0)
+mass = st.sidebar.slider("Masa (kg)", 0.1, 5.0, 1.0)
 start_button = st.sidebar.button("Iniciar")
 stop_button = st.sidebar.button("Detener")
 
-# --- Estado ---
-running = False
+# --- Estado global ---
 if "running" not in st.session_state:
     st.session_state.running = False
+if "frame_counter" not in st.session_state:
+    st.session_state.frame_counter = 0
 
 if start_button:
     st.session_state.running = True
+    st.session_state.frame_counter = 0
 if stop_button:
     st.session_state.running = False
 
-# --- Funciones de pendulo ---
+# --- Función para segmentos de cuerda ---
 def segmentos_cuerda(x1, y1, x2, y2, n=24):
     xs = np.linspace(x1, x2, n)
     ys = np.linspace(y1, y2, n)
     points = np.array([xs, ys]).T.reshape(-1, 1, 2)
     return np.concatenate([points[:-1], points[1:]], axis=1)
 
-# --- Configuración inicial de la figura ---
+# --- Parámetros físicos ---
+g = 9.81
+radio_base = 0.18
+long_max = 6.0
+
+theta0 = np.radians(angle_deg)
+x_support = -0.16/2 + 0.7
+y_support = -long_max + long_max + 0.8  # Ajuste soporte superior
+
+# --- Animación con refresco automático ---
+refresh_rate = 50  # ms
+st_autorefresh(interval=refresh_rate, key="pendulo_autorefresh")
+
+# --- Crear figura ---
 fig, ax = plt.subplots(figsize=(6,7))
 ax.set_aspect("equal")
 ax.axis("off")
 ax.set_facecolor("#f6f6f6")
 
 # Soporte
-base_width = 3.5
-base_height = 0.25
-pillar_height = long_max + 0.8
-pillar_width = 0.16
-arm_length = 0.7
-arm_height = 0.08
-
-base = Rectangle((-base_width/2, -long_max - base_height), base_width, base_height,
-                 fc="#333333", ec="black", lw=1.0, zorder=0)
-pillar = Rectangle((-pillar_width/2, -long_max), pillar_width, pillar_height,
-                   fc="#888888", ec="#444444", lw=1.2, zorder=0)
-arm = Rectangle((-pillar_width/2, -long_max + pillar_height),
-                arm_length, arm_height,
-                fc="#777777", ec="#444444", lw=1.2, zorder=0)
-
+base = Rectangle((-3.5/2, -long_max - 0.25), 3.5, 0.25, fc="#333333", ec="black", lw=1.0, zorder=0)
+pillar = Rectangle((-0.16/2, -long_max), 0.16, long_max + 0.8, fc="#888888", ec="#444444", lw=1.2, zorder=0)
+arm = Rectangle((-0.16/2, -long_max + long_max + 0.8), 0.7, 0.08, fc="#777777", ec="#444444", lw=1.2, zorder=0)
 ax.add_patch(base)
 ax.add_patch(pillar)
 ax.add_patch(arm)
 
-x_support = -pillar_width / 2 + arm_length
-y_support = -long_max + pillar_height
-
 # Márgenes
-margen_x = 1.0
-margen_y = 1.0
-ax.set_xlim(x_support - long_max - margen_x, x_support + long_max + margen_x)
-ax.set_ylim(-long_max - base_height - margen_y, y_support + long_max*0.2 + margen_y)
+ax.set_xlim(x_support - long_max - 1, x_support + long_max + 1)
+ax.set_ylim(-long_max - 0.25 - 1, y_support + long_max*0.2 + 1)
 
-# Cuerda y bola
-theta0 = np.radians(angle_deg)
+# Posición inicial
+theta_init = theta0
 x0 = x_support + L * np.sin(theta0)
 y0 = y_support - L * np.cos(theta0)
 
@@ -91,33 +83,20 @@ sombra = Circle((x0-0.03*r0, y0+0.03*r0), r0*0.7, fc='white', ec='none', alpha=0
 ax.add_patch(bola)
 ax.add_patch(sombra)
 
-# Texto del período (invisible al inicio)
+# Texto período
 text_period = ax.text(0, y_support + long_max*0.3, '', fontsize=16, ha='center', va='center',
                       color='black', bbox=dict(facecolor='white', alpha=0.8, boxstyle='round,pad=0.5'))
 
-# --- Animación ---
-frame_counter = 0
-theta_initial = theta0
-
-# Placeholder de Streamlit
-plot_placeholder = st.empty()
+# --- Animación frame a frame ---
+dt = refresh_rate / 1000  # convertir ms a segundos
 
 if st.session_state.running:
-    # Mostrar cartel de período al iniciar
+    # Mostrar período
     T = 2*np.pi*np.sqrt(L/g)
     text_period.set_text(f"Período: {T:.2f} s")
-else:
-    text_period.set_text('')
-
-# Loop de animación simplificado
-frames = 200
-dt = 0.02
-
-for frame in range(frames):
-    if not st.session_state.running:
-        break
-    t = frame * dt
-    theta = theta_initial * np.cos(np.sqrt(g/L) * t)
+    
+    frame = st.session_state.frame_counter
+    theta = theta_init * np.cos(np.sqrt(g/L) * frame * dt)
     x = x_support + L * np.sin(theta)
     y = y_support - L * np.cos(theta)
     r = radio_base * np.sqrt(mass)
@@ -128,6 +107,9 @@ for frame in range(frames):
     sombra.radius = r*0.7
     cuerda.set_segments(segmentos_cuerda(x_support, y_support, x, y))
 
-    # Actualizar el placeholder
-    plot_placeholder.pyplot(fig)
-    time.sleep(dt)
+    st.session_state.frame_counter += 1
+else:
+    text_period.set_text('')
+
+# --- Mostrar figura ---
+st.pyplot(fig)
