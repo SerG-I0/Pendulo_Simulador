@@ -2,23 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simulador Interactivo del Péndulo</title>
+  <title>🧭 Simulador Interactivo del Péndulo</title>
+  <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+  <py-config>
+    packages = ["matplotlib", "numpy"]
+  </py-config>
   <style>
     body {
-      margin: 0;
-      background-color: #f5f5f5;
-      font-family: "Segoe UI", Arial, sans-serif;
-      color: #222;
+      font-family: Arial, sans-serif;
       text-align: center;
+      background-color: #fafafa;
     }
-    h1 {
-      margin-top: 1rem;
-      color: #6b0000;
-    }
-    canvas {
+    py-script {
       display: block;
       margin: 0 auto;
+      max-width: 800px;
     }
   </style>
 </head>
@@ -26,18 +24,12 @@
   <h1>🧭 Simulador Interactivo del Péndulo</h1>
   <p>Controla la longitud, el ángulo y la masa para ver cómo cambia el movimiento y el período.</p>
 
-  <!-- py-script -->
-  <py-config>
-    packages = ["matplotlib", "numpy"]
-  </py-config>
-
+  <!-- Aquí se cargará el script -->
   <py-script src="main.py"></py-script>
 
-  <footer style="margin-top: 2rem; font-size: 0.9em; color: #555;">
+  <footer style="margin-top: 2em; color: gray; font-size: 0.9em;">
     © Simulador educativo de péndulo simple.
   </footer>
-
-  <!-- Carga PyScript desde CDN -->
-  <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 </body>
 </html>
+
