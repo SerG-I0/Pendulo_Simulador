@@ -13,7 +13,6 @@ let dt = 0.02;
 
 // --- Escala y soporte ---
 let xSupport, ySupport;
-let basePxScale = 85;
 let pxScale;
 
 // --- Controles ---
@@ -27,11 +26,11 @@ function setup() {
   angleMode(RADIANS);
   noStroke();
 
-  // Punto de suspensión
+  // Ajuste compacto: soporte más alto para que la bola toque la base
+  ySupport = 150; 
   xSupport = width / 2 + 70;
-  ySupport = 180;
 
-  // Crear sliders con labels y valores en contenedor
+  // Crear sliders
   lengthSlider = createSliderRow("Longitud (m)", 0.5, 6, 2.5, 0.1, "#4c72b0");
   angleSlider = createSliderRow("Ángulo (°)", 5, 90, 20, 1, "#55a868");
   massSlider = createSliderRow("Masa (kg)", 0.1, 5, 1, 0.1, "#c44e52");
@@ -39,25 +38,33 @@ function setup() {
   // Botones
   startButton = createButton("Iniciar");
   startButton.parent("controls");
+  styleButton(startButton);
   startButton.mousePressed(startPendulum);
 
   stopButton = createButton("Detener");
   stopButton.parent("controls");
+  styleButton(stopButton);
   stopButton.mousePressed(stopPendulum);
 }
 
+// --- Crear fila de slider ---
 function createSliderRow(labelText, min, max, val, step, color) {
   const container = createDiv().class("slider-row").parent("controls");
 
   const label = createP(labelText).parent(container);
+  label.style("margin", "0");
+  label.style("font-size", "15px");
+
   const slider = createSlider(min, max, val, step).parent(container);
-  slider.style("accent-color", color);
-  slider.style("background-color", "white");
-  slider.style("padding", "2px");
+  slider.style("width", "350px");
+  slider.style("accent-color", color); 
+  slider.style("background-color", "transparent");
 
   const valueP = createP(val.toFixed(2)).parent(container);
+  valueP.style("margin", "0");
+  valueP.style("font-size", "15px");
 
-  // Guardar referencia al valor para actualizarlo
+  // Guardar referencias
   if (labelText.includes("Longitud")) lengthValue = valueP;
   if (labelText.includes("Ángulo")) angleValue = valueP;
   if (labelText.includes("Masa")) massValue = valueP;
@@ -65,6 +72,20 @@ function createSliderRow(labelText, min, max, val, step, color) {
   return slider;
 }
 
+// --- Estilos botón ---
+function styleButton(btn) {
+  btn.style("background-color", "#d9d9d9");
+  btn.style("border", "none");
+  btn.style("border-radius", "10px");
+  btn.style("padding", "8px 18px");
+  btn.style("font-size", "16px");
+  btn.style("margin", "5px");
+  btn.style("cursor", "pointer");
+  btn.mouseOver(() => btn.style("background-color", "#bbbbbb"));
+  btn.mouseOut(() => btn.style("background-color", "#d9d9d9"));
+}
+
+// --- Dibujo ---
 function draw() {
   background("#f6f6f6");
   drawStructure();
@@ -80,9 +101,8 @@ function draw() {
   angleValue.html(degrees(theta0).toFixed(0));
   massValue.html(mass.toFixed(2));
 
-  // Escala automática
-  pxScale = basePxScale * (2.5 / L);
-  pxScale = constrain(pxScale, 40, 100);
+  // Escala vertical ajustada
+  pxScale = (height - 300 - 20) / 6; 
 
   let theta = running ? theta0 * Math.cos(Math.sqrt(g / L) * t) : theta0;
 
@@ -122,22 +142,23 @@ function draw() {
   }
 }
 
+// --- Estructura ---
 function drawStructure() {
   push();
   rectMode(CENTER);
 
-  // Base inferior
+  // Base
   noStroke();
   fill("#333");
   rect(width / 2, height - 80, 350, 35, 6);
 
-  // Pilar vertical
+  // Pilar
   fill("#8a8a8a");
   stroke("#000");
   strokeWeight(1.5);
   rect(width / 2, ySupport + 260, 20, 520);
 
-  // Brazo horizontal (pegado al pilar, sobresale a la derecha)
+  // Brazo horizontal
   fill("#777");
   stroke("#000");
   strokeWeight(1.5);
@@ -151,6 +172,7 @@ function drawStructure() {
   pop();
 }
 
+// --- Control ---
 function startPendulum() {
   if (!running) {
     running = true;
@@ -168,4 +190,5 @@ function stopPendulum() {
   angleSlider.removeAttribute("disabled");
   massSlider.removeAttribute("disabled");
 }
+
 
