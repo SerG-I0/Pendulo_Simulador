@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Péndulo Simple Interactivo</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+  <script src="script.js"></script>
+</head>
+<body>
+  <h1>Péndulo Simple</h1>
+  <div id="controls">
+    <label>Longitud (m): <input type="range" id="length" min="0.5" max="6" step="0.1" value="2.5"></label>
+    <label>Ángulo (°): <input type="range" id="angle" min="5" max="90" step="1" value="20"></label>
+    <label>Masa (kg): <input type="range" id="mass" min="0.1" max="5" step="0.1" value="1"></label>
+    <div id="buttons">
+      <button id="start">Iniciar</button>
+      <button id="stop">Detener</button>
+    </div>
+  </div>
+  <p id="period"></p>
+</body>
+</html>
