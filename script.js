@@ -11,7 +11,7 @@ let xSupport, ySupport;
 let pxScale;
 
 // --- Alturas y dimensiones ---
-const pilarAltura = 520;
+const pilarAltura = 400;    // Reducido para compactar
 const pilarAncho = 20;
 const baseAltura = 35;
 const baseAncho = 350;
@@ -34,14 +34,14 @@ startBtn.addEventListener("click", startPendulum);
 stopBtn.addEventListener("click", stopPendulum);
 
 function setup() {
-  const canvas = createCanvas(700, 900);
+  const canvas = createCanvas(900, 600); // más ancho, menos alto para que todo quepa
   canvas.parent("canvas-container");
   angleMode(RADIANS);
   noStroke();
 
   // Soporte superior
-  ySupport = 150;
-  xSupport = width / 2 + 70;
+  ySupport = 100;
+  xSupport = width / 2 + 50;
 
   // Inicializar relleno de sliders
   updateSliderFill(lengthSlider);
@@ -67,8 +67,9 @@ function draw() {
   angleValue.textContent = angleSlider.value;
   massValue.textContent = mass.toFixed(2);
 
-  // Escala vertical automática
-  pxScale = (height - 300 - 20) / 6;
+  // Escala vertical automática para que la bola toque base
+  const Lmax = 6; // longitud máxima
+  pxScale = (pilarAltura - baseAltura) / Lmax; // ajustar para que toque base
 
   let theta = running ? theta0 * Math.cos(Math.sqrt(g / L) * t) : theta0;
 
@@ -99,12 +100,12 @@ function draw() {
     stroke("#1a2230");
     strokeWeight(1.5);
     rectMode(CENTER);
-    rect(width / 2, 60, 180, 50, 10);
+    rect(width / 2, 50, 180, 50, 10);
     noStroke();
     fill(255);
     textAlign(CENTER, CENTER);
     textSize(18);
-    text(`Período: ${T.toFixed(2)} s`, width / 2, 60);
+    text(`Período: ${T.toFixed(2)} s`, width / 2, 50);
   }
 }
 
@@ -116,20 +117,19 @@ function drawStructure() {
   fill("#8a8a8a");
   stroke("#000");
   strokeWeight(1.5);
-  rect(width / 2, ySupport + pilarAltura/2, pilarAncho, pilarAltura);
+  rect(width / 2, ySupport + pilarAltura / 2, pilarAncho, pilarAltura);
 
   // Base pegada al pilar
   fill("#333");
   noStroke();
-  rect(width / 2, ySupport + pilarAltura + baseAltura/2, baseAncho, baseAltura, 6);
+  rect(width / 2, ySupport + pilarAltura + baseAltura / 2, baseAncho, baseAltura, 6);
 
-  // Brazo horizontal (pegado al pilar)
+  // Brazo horizontal pegado al pilar
   fill("#777");
   stroke("#000");
   strokeWeight(1.5);
   rectMode(CORNER);
-  rect(width/2, ySupport - brazoAltura/2, brazoAltura + brazoAncho - 2, brazoAltura); 
-  // ajusta posición para que quede pegado al pilar
+  rect(width / 2, ySupport - brazoAltura / 2, brazoAncho, brazoAltura);
   rectMode(CENTER);
 
   // Pivote
@@ -170,3 +170,4 @@ function updateSliderFill(slider) {
                                                "#c44e52";
   slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${percent}%, #ddd ${percent}%, #ddd 100%)`;
 }
+
