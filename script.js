@@ -25,34 +25,55 @@ function setup() {
   angleMode(RADIANS);
   noStroke();
 
-  // Punto de suspensión
+  // Punto de suspensión (desde el extremo derecho del brazo metálico)
   xSupport = width / 2 + 70;
   ySupport = 180;
 
   // ---- Sliders ----
-  textSize(14);
-  fill(0);
+  let sliderWidth = 400;
+  let slidersX = width / 2 - sliderWidth / 2;
+  let baseY = height - 180;
 
+  // Longitud
   lengthSlider = createSlider(0.5, 6, 2.5, 0.1);
-  lengthSlider.position(150, height - 140);
-  lengthSlider.style('width', '400px');
+  lengthSlider.position(slidersX, baseY);
+  lengthSlider.style("width", sliderWidth + "px");
+  lengthSlider.style("accent-color", "#4c72b0");
 
+  // Ángulo
   angleSlider = createSlider(5, 90, 20, 1);
-  angleSlider.position(150, height - 110);
-  angleSlider.style('width', '400px');
+  angleSlider.position(slidersX, baseY + 40);
+  angleSlider.style("width", sliderWidth + "px");
+  angleSlider.style("accent-color", "#55a868");
 
+  // Masa
   massSlider = createSlider(0.1, 5, 1, 0.1);
-  massSlider.position(150, height - 80);
-  massSlider.style('width', '400px');
+  massSlider.position(slidersX, baseY + 80);
+  massSlider.style("width", sliderWidth + "px");
+  massSlider.style("accent-color", "#c44e52");
 
   // ---- Botones ----
   startButton = createButton("Iniciar");
-  startButton.position(width / 2 - 120, height - 45);
+  startButton.position(width / 2 - 130, baseY + 130);
+  styleButton(startButton);
   startButton.mousePressed(startPendulum);
 
   stopButton = createButton("Detener");
-  stopButton.position(width / 2 + 40, height - 45);
+  stopButton.position(width / 2 + 20, baseY + 130);
+  styleButton(stopButton);
   stopButton.mousePressed(stopPendulum);
+}
+
+// --- Estilo de botones ---
+function styleButton(btn) {
+  btn.style("background-color", "#d9d9d9");
+  btn.style("border", "none");
+  btn.style("border-radius", "10px");
+  btn.style("padding", "8px 18px");
+  btn.style("cursor", "pointer");
+  btn.style("font-size", "16px");
+  btn.mouseOver(() => btn.style("background-color", "#bbbbbb"));
+  btn.mouseOut(() => btn.style("background-color", "#d9d9d9"));
 }
 
 // --- Dibujo principal ---
@@ -93,21 +114,21 @@ function draw() {
   if (running) t += dt;
 
   // Mostrar etiquetas sliders
-  fill(30);
   noStroke();
+  fill(30);
+  textSize(14);
   textAlign(LEFT);
-  text(`Longitud (m): ${L.toFixed(2)}`, 30, height - 130);
-  text(`Ángulo (°): ${degrees(theta0).toFixed(0)}`, 30, height - 100);
-  text(`Masa (kg): ${mass.toFixed(2)}`, 30, height - 70);
+  text(`Longitud (m): ${L.toFixed(2)}`, 80, height - 165);
+  text(`Ángulo (°): ${degrees(theta0).toFixed(0)}`, 80, height - 125);
+  text(`Masa (kg): ${mass.toFixed(2)}`, 80, height - 85);
 
   // Mostrar período solo si está corriendo
   if (running) {
     let T = 2 * Math.PI * Math.sqrt(L / g);
-    fill("#f8f8f8");
+    fill("#2e3b4e");
     stroke("#1a2230");
     strokeWeight(1.5);
     rectMode(CENTER);
-    fill("#2e3b4e");
     rect(width / 2, 60, 180, 50, 10);
     noStroke();
     fill(255);
@@ -127,13 +148,14 @@ function drawStructure() {
   fill("#333");
   rect(width / 2, height - 80, 350, 35, 6);
 
-  // Pilar
+  // Pilar vertical
   fill("#8a8a8a");
   rect(width / 2, ySupport + 260, 20, 520);
 
-  // Brazo superior
+  // Brazo superior: solo sobresale hacia la derecha
   fill("#777");
-  rect(width / 2, ySupport, 160, 12, 3);
+  rect(width / 2 + 40, ySupport, 160, 12, 3);
+
   pop();
 }
 
