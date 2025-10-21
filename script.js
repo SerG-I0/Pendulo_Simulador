@@ -2,9 +2,9 @@
 let g = 9.81;
 
 // --- Variables del sistema ---
-let L = 2.5;                     
-let theta0 = 20 * Math.PI / 180; 
-let mass = 1.0;                  
+let L = 2.5;
+let theta0 = 20 * Math.PI / 180;
+let mass = 1.0;
 
 // --- Estado de simulación ---
 let running = false;
@@ -22,7 +22,6 @@ let startButton, stopButton;
 let lengthLabel, angleLabel, massLabel;
 let lengthValue, angleValue, massValue;
 
-// --- Setup ---
 function setup() {
   createCanvas(700, 900);
   angleMode(RADIANS);
@@ -32,40 +31,14 @@ function setup() {
   xSupport = width / 2 + 70;
   ySupport = 180;
 
-  // Posición de controles debajo del péndulo
-  let sliderWidth = 350;
-  let controlX = width / 2 - sliderWidth / 2 + 80;
-  let labelX = controlX - 100;
-  let valueX = controlX + sliderWidth + 20;
+  // Posición y tamaño de los sliders
   let baseY = 550;  // debajo del péndulo
+  let sliderWidth = 350;
 
-  // --- Sliders ---
-  lengthLabel = createP("Longitud (m)");
-  styleLabel(lengthLabel, labelX, baseY - 15);
-
-  lengthSlider = createSlider(0.5, 6, 2.5, 0.1);
-  lengthSlider.position(controlX, baseY);
-  styleSlider(lengthSlider, "#4c72b0");
-  lengthValue = createP(L.toFixed(2));
-  styleValue(lengthValue, valueX, baseY - 15);
-
-  angleLabel = createP("Ángulo (°)");
-  styleLabel(angleLabel, labelX, baseY + 50);
-
-  angleSlider = createSlider(5, 90, 20, 1);
-  angleSlider.position(controlX, baseY + 65);
-  styleSlider(angleSlider, "#55a868");
-  angleValue = createP(degrees(theta0).toFixed(0));
-  styleValue(angleValue, valueX, baseY + 50);
-
-  massLabel = createP("Masa (kg)");
-  styleLabel(massLabel, labelX, baseY + 100);
-
-  massSlider = createSlider(0.1, 5, 1, 0.1);
-  massSlider.position(controlX, baseY + 115);
-  styleSlider(massSlider, "#c44e52");
-  massValue = createP(mass.toFixed(2));
-  styleValue(massValue, valueX, baseY + 100);
+  // ---- Contenedor dinámico de sliders para mejor alineación ----
+  createSliderRow("Longitud (m)", 0.5, 6, 2.5, 0.1, "#4c72b0", baseY);
+  createSliderRow("Ángulo (°)", 5, 90, 20, 1, "#55a868", baseY + 60);
+  createSliderRow("Masa (kg)", 0.1, 5, 1, 0.1, "#c44e52", baseY + 120);
 
   // --- Botones ---
   startButton = createButton("Iniciar");
@@ -79,7 +52,36 @@ function setup() {
   stopButton.mousePressed(stopPendulum);
 }
 
-// --- Estilos ---
+// --- Crear fila de slider con label y valor ---
+function createSliderRow(labelText, min, max, val, step, color, yPos) {
+  let label = createP(labelText);
+  label.style("margin", "0");
+  label.style("font-size", "15px");
+  label.style("color", "#333");
+  label.style("font-family", "Segoe UI, sans-serif");
+  label.position(width / 2 - 250, yPos - 5);
+
+  let slider = createSlider(min, max, val, step);
+  slider.position(width / 2 - 50, yPos);
+  slider.style("width", "350px");
+  slider.style("accent-color", color);
+  slider.style("background-color", "white");
+  slider.style("padding", "2px");
+
+  let valueP = createP(val.toFixed(2));
+  valueP.style("margin", "0");
+  valueP.style("font-size", "15px");
+  valueP.style("color", "#333");
+  valueP.style("font-family", "Segoe UI, sans-serif");
+  valueP.position(width / 2 + 320, yPos - 5);
+
+  // Guardar referencias
+  if (labelText.includes("Longitud")) { lengthSlider = slider; lengthValue = valueP; }
+  if (labelText.includes("Ángulo")) { angleSlider = slider; angleValue = valueP; }
+  if (labelText.includes("Masa")) { massSlider = slider; massValue = valueP; }
+}
+
+// --- Estilos de botones ---
 function styleButton(btn) {
   btn.style("background-color", "#d9d9d9");
   btn.style("border", "none");
@@ -91,35 +93,11 @@ function styleButton(btn) {
   btn.mouseOut(() => btn.style("background-color", "#d9d9d9"));
 }
 
-function styleSlider(slider, color) {
-  slider.style("width", "350px");
-  slider.style("accent-color", color);
-  slider.style("background-color", "white");
-  slider.style("padding", "2px");
-}
-
-function styleLabel(el, x, y) {
-  el.position(x, y);
-  el.style("font-size", "15px");
-  el.style("margin", "0");
-  el.style("color", "#333");
-  el.style("font-family", "Segoe UI, sans-serif");
-}
-
-function styleValue(el, x, y) {
-  el.position(x, y);
-  el.style("font-size", "15px");
-  el.style("margin", "0");
-  el.style("color", "#333");
-  el.style("font-family", "Segoe UI, sans-serif");
-}
-
 // --- Dibujo principal ---
 function draw() {
   background("#f6f6f6");
   drawStructure();
 
-  // Leer sliders si no está corriendo
   if (!running) {
     L = lengthSlider.value();
     theta0 = angleSlider.value() * Math.PI / 180;
@@ -135,10 +113,8 @@ function draw() {
   pxScale = basePxScale * (2.5 / L);
   pxScale = constrain(pxScale, 40, 100);
 
-  // Ángulo actual
   let theta = running ? theta0 * Math.cos(Math.sqrt(g / L) * t) : theta0;
 
-  // Posición masa
   let x = xSupport + L * pxScale * Math.sin(theta);
   let y = ySupport + L * pxScale * Math.cos(theta);
 
@@ -157,10 +133,9 @@ function draw() {
   fill(255, 255, 255, 70);
   circle(x - 0.15 * r, y - 0.15 * r, 1.3 * r);
 
-  // Avanzar tiempo
   if (running) t += dt;
 
-  // Mostrar período si está corriendo
+  // Cartel período
   if (running) {
     let T = 2 * Math.PI * Math.sqrt(L / g);
     fill("#2e3b4e");
@@ -176,7 +151,7 @@ function draw() {
   }
 }
 
-// --- Estructura metálica con borde negro ---
+// --- Estructura metálica ---
 function drawStructure() {
   push();
   rectMode(CENTER);
@@ -192,11 +167,11 @@ function drawStructure() {
   strokeWeight(1.5);
   rect(width / 2, ySupport + 260, 20, 520);
 
-  // Brazo superior (solo a la derecha)
+  // Brazo horizontal (pegado al pilar, sobresale a la derecha)
   fill("#777");
   stroke("#000");
   strokeWeight(1.5);
-  rect(width / 2 + 40, ySupport, 160, 12, 3);
+  rect(width / 2 + 10, ySupport, 160, 12, 3);
 
   // Pivote
   noStroke();
@@ -210,7 +185,6 @@ function startPendulum() {
   if (!running) {
     running = true;
     t = 0;
-    // Bloquear sliders
     lengthSlider.attribute("disabled", "");
     angleSlider.attribute("disabled", "");
     massSlider.attribute("disabled", "");
@@ -220,10 +194,7 @@ function startPendulum() {
 function stopPendulum() {
   running = false;
   t = 0;
-  // Desbloquear sliders
   lengthSlider.removeAttribute("disabled");
   angleSlider.removeAttribute("disabled");
   massSlider.removeAttribute("disabled");
 }
-
-
