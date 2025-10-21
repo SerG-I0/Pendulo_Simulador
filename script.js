@@ -2,9 +2,9 @@
 let g = 9.81;
 
 // --- Variables del sistema ---
-let L = 2.5;                      // Longitud inicial (m)
-let theta0 = 20 * Math.PI / 180;  // Ángulo inicial (rad)
-let mass = 1.0;                   // Masa (kg)
+let L = 2.5;                     
+let theta0 = 20 * Math.PI / 180; 
+let mass = 1.0;                  
 
 // --- Estado de simulación ---
 let running = false;
@@ -24,7 +24,7 @@ let lengthValue, angleValue, massValue;
 
 // --- Setup ---
 function setup() {
-  createCanvas(700, 850);
+  createCanvas(700, 900);
   angleMode(RADIANS);
   noStroke();
 
@@ -32,51 +32,49 @@ function setup() {
   xSupport = width / 2 + 70;
   ySupport = 180;
 
+  // Posición de controles debajo del péndulo
   let sliderWidth = 350;
   let controlX = width / 2 - sliderWidth / 2 + 80;
   let labelX = controlX - 100;
   let valueX = controlX + sliderWidth + 20;
-  let baseY = height - 220;
+  let baseY = 550;  // debajo del péndulo
 
-  // ---- Sliders y etiquetas ----
+  // --- Sliders ---
   lengthLabel = createP("Longitud (m)");
   styleLabel(lengthLabel, labelX, baseY - 15);
 
   lengthSlider = createSlider(0.5, 6, 2.5, 0.1);
   lengthSlider.position(controlX, baseY);
-  lengthSlider.style("width", sliderWidth + "px");
-  lengthSlider.style("accent-color", "#4c72b0");
+  styleSlider(lengthSlider, "#4c72b0");
   lengthValue = createP(L.toFixed(2));
   styleValue(lengthValue, valueX, baseY - 15);
 
   angleLabel = createP("Ángulo (°)");
-  styleLabel(angleLabel, labelX, baseY + 35);
+  styleLabel(angleLabel, labelX, baseY + 50);
 
   angleSlider = createSlider(5, 90, 20, 1);
-  angleSlider.position(controlX, baseY + 50);
-  angleSlider.style("width", sliderWidth + "px");
-  angleSlider.style("accent-color", "#55a868");
+  angleSlider.position(controlX, baseY + 65);
+  styleSlider(angleSlider, "#55a868");
   angleValue = createP(degrees(theta0).toFixed(0));
-  styleValue(angleValue, valueX, baseY + 35);
+  styleValue(angleValue, valueX, baseY + 50);
 
   massLabel = createP("Masa (kg)");
-  styleLabel(massLabel, labelX, baseY + 85);
+  styleLabel(massLabel, labelX, baseY + 100);
 
   massSlider = createSlider(0.1, 5, 1, 0.1);
-  massSlider.position(controlX, baseY + 100);
-  massSlider.style("width", sliderWidth + "px");
-  massSlider.style("accent-color", "#c44e52");
+  massSlider.position(controlX, baseY + 115);
+  styleSlider(massSlider, "#c44e52");
   massValue = createP(mass.toFixed(2));
-  styleValue(massValue, valueX, baseY + 85);
+  styleValue(massValue, valueX, baseY + 100);
 
-  // ---- Botones ----
+  // --- Botones ---
   startButton = createButton("Iniciar");
-  startButton.position(width / 2 - 130, baseY + 160);
+  startButton.position(width / 2 - 130, baseY + 180);
   styleButton(startButton);
   startButton.mousePressed(startPendulum);
 
   stopButton = createButton("Detener");
-  stopButton.position(width / 2 + 20, baseY + 160);
+  stopButton.position(width / 2 + 20, baseY + 180);
   styleButton(stopButton);
   stopButton.mousePressed(stopPendulum);
 }
@@ -91,6 +89,13 @@ function styleButton(btn) {
   btn.style("font-size", "16px");
   btn.mouseOver(() => btn.style("background-color", "#bbbbbb"));
   btn.mouseOut(() => btn.style("background-color", "#d9d9d9"));
+}
+
+function styleSlider(slider, color) {
+  slider.style("width", "350px");
+  slider.style("accent-color", color);
+  slider.style("background-color", "white");
+  slider.style("padding", "2px");
 }
 
 function styleLabel(el, x, y) {
@@ -220,4 +225,5 @@ function stopPendulum() {
   angleSlider.removeAttribute("disabled");
   massSlider.removeAttribute("disabled");
 }
+
 
