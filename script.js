@@ -10,6 +10,14 @@ const dt = 0.02;
 let xSupport, ySupport;
 let pxScale;
 
+// --- Alturas y dimensiones ---
+const pilarAltura = 520;
+const pilarAncho = 20;
+const baseAltura = 35;
+const baseAncho = 350;
+const brazoAltura = 12;
+const brazoAncho = 160;
+
 // --- Referencias sliders y valores ---
 const lengthSlider = document.getElementById("lengthSlider");
 const angleSlider = document.getElementById("angleSlider");
@@ -31,9 +39,19 @@ function setup() {
   angleMode(RADIANS);
   noStroke();
 
-  // Ajuste compacto
+  // Soporte superior
   ySupport = 150;
   xSupport = width / 2 + 70;
+
+  // Inicializar relleno de sliders
+  updateSliderFill(lengthSlider);
+  updateSliderFill(angleSlider);
+  updateSliderFill(massSlider);
+
+  // Eventos para actualizar relleno dinámico
+  lengthSlider.addEventListener("input", () => updateSliderFill(lengthSlider));
+  angleSlider.addEventListener("input", () => updateSliderFill(angleSlider));
+  massSlider.addEventListener("input", () => updateSliderFill(massSlider));
 }
 
 function draw() {
@@ -50,7 +68,7 @@ function draw() {
   massValue.textContent = mass.toFixed(2);
 
   // Escala vertical automática
-  pxScale = (height - 300 - 20) / 6; // 6 m máximo, 20 px margen
+  pxScale = (height - 300 - 20) / 6;
 
   let theta = running ? theta0 * Math.cos(Math.sqrt(g / L) * t) : theta0;
 
@@ -94,22 +112,25 @@ function drawStructure() {
   push();
   rectMode(CENTER);
 
-  // Base
-  noStroke();
-  fill("#333");
-  rect(width / 2, height - 80, 350, 35, 6);
-
   // Pilar
   fill("#8a8a8a");
   stroke("#000");
   strokeWeight(1.5);
-  rect(width / 2, ySupport + 260, 20, 520);
+  rect(width / 2, ySupport + pilarAltura/2, pilarAncho, pilarAltura);
 
-  // Brazo horizontal
+  // Base pegada al pilar
+  fill("#333");
+  noStroke();
+  rect(width / 2, ySupport + pilarAltura + baseAltura/2, baseAncho, baseAltura, 6);
+
+  // Brazo horizontal (pegado al pilar)
   fill("#777");
   stroke("#000");
   strokeWeight(1.5);
-  rect(width / 2 + 10, ySupport, 160, 12, 3);
+  rectMode(CORNER);
+  rect(width/2, ySupport - brazoAltura/2, brazoAltura + brazoAncho - 2, brazoAltura); 
+  // ajusta posición para que quede pegado al pilar
+  rectMode(CENTER);
 
   // Pivote
   noStroke();
@@ -119,6 +140,7 @@ function drawStructure() {
   pop();
 }
 
+// --- Bloqueo/desbloqueo sliders ---
 function startPendulum() {
   if (!running) {
     running = true;
@@ -137,4 +159,14 @@ function stopPendulum() {
   massSlider.disabled = false;
 }
 
-
+// --- Actualizar relleno dinámico ---
+function updateSliderFill(slider) {
+  const val = slider.value;
+  const min = slider.min;
+  const max = slider.max;
+  const percent = ((val - min) / (max - min)) * 100;
+  const color = slider.id === "lengthSlider" ? "#4c72b0" :
+                slider.id === "angleSlider"  ? "#55a868" :
+                                               "#c44e52";
+  slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${percent}%, #ddd ${percent}%, #ddd 100%)`;
+}
