@@ -23,9 +23,9 @@ body {
 .slider-row {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
-  width: 550px;
   justify-content: space-between;
+  width: 550px;
+  margin-bottom: 15px;
 }
 
 .slider-row p {
@@ -35,7 +35,6 @@ body {
 }
 
 input[type=range] {
-  background-color: white;
   -webkit-appearance: none;
   height: 8px;
   border-radius: 5px;
