@@ -13,58 +13,75 @@ let dt = 0.02;
 
 // --- Escala y soporte ---
 let xSupport, ySupport;
-let pxScale = 90; // Escala píxel/metro
+let basePxScale = 85;
+let pxScale;
 
 // --- Controles ---
 let lengthSlider, angleSlider, massSlider;
 let startButton, stopButton;
+let lengthLabel, angleLabel, massLabel;
+let lengthValue, angleValue, massValue;
 
 // --- Setup ---
 function setup() {
-  createCanvas(700, 800);
+  createCanvas(700, 850);
   angleMode(RADIANS);
   noStroke();
 
-  // Punto de suspensión (desde el extremo derecho del brazo metálico)
+  // Punto de suspensión
   xSupport = width / 2 + 70;
   ySupport = 180;
 
-  // ---- Sliders ----
-  let sliderWidth = 400;
-  let slidersX = width / 2 - sliderWidth / 2;
-  let baseY = height - 180;
+  let sliderWidth = 350;
+  let controlX = width / 2 - sliderWidth / 2 + 80;
+  let labelX = controlX - 100;
+  let valueX = controlX + sliderWidth + 20;
+  let baseY = height - 220;
 
-  // Longitud
+  // ---- Sliders y etiquetas ----
+  lengthLabel = createP("Longitud (m)");
+  styleLabel(lengthLabel, labelX, baseY - 15);
+
   lengthSlider = createSlider(0.5, 6, 2.5, 0.1);
-  lengthSlider.position(slidersX, baseY);
+  lengthSlider.position(controlX, baseY);
   lengthSlider.style("width", sliderWidth + "px");
   lengthSlider.style("accent-color", "#4c72b0");
+  lengthValue = createP(L.toFixed(2));
+  styleValue(lengthValue, valueX, baseY - 15);
 
-  // Ángulo
+  angleLabel = createP("Ángulo (°)");
+  styleLabel(angleLabel, labelX, baseY + 35);
+
   angleSlider = createSlider(5, 90, 20, 1);
-  angleSlider.position(slidersX, baseY + 40);
+  angleSlider.position(controlX, baseY + 50);
   angleSlider.style("width", sliderWidth + "px");
   angleSlider.style("accent-color", "#55a868");
+  angleValue = createP(degrees(theta0).toFixed(0));
+  styleValue(angleValue, valueX, baseY + 35);
 
-  // Masa
+  massLabel = createP("Masa (kg)");
+  styleLabel(massLabel, labelX, baseY + 85);
+
   massSlider = createSlider(0.1, 5, 1, 0.1);
-  massSlider.position(slidersX, baseY + 80);
+  massSlider.position(controlX, baseY + 100);
   massSlider.style("width", sliderWidth + "px");
   massSlider.style("accent-color", "#c44e52");
+  massValue = createP(mass.toFixed(2));
+  styleValue(massValue, valueX, baseY + 85);
 
   // ---- Botones ----
   startButton = createButton("Iniciar");
-  startButton.position(width / 2 - 130, baseY + 130);
+  startButton.position(width / 2 - 130, baseY + 160);
   styleButton(startButton);
   startButton.mousePressed(startPendulum);
 
   stopButton = createButton("Detener");
-  stopButton.position(width / 2 + 20, baseY + 130);
+  stopButton.position(width / 2 + 20, baseY + 160);
   styleButton(stopButton);
   stopButton.mousePressed(stopPendulum);
 }
 
-// --- Estilo de botones ---
+// --- Estilos ---
 function styleButton(btn) {
   btn.style("background-color", "#d9d9d9");
   btn.style("border", "none");
@@ -76,22 +93,47 @@ function styleButton(btn) {
   btn.mouseOut(() => btn.style("background-color", "#d9d9d9"));
 }
 
+function styleLabel(el, x, y) {
+  el.position(x, y);
+  el.style("font-size", "15px");
+  el.style("margin", "0");
+  el.style("color", "#333");
+  el.style("font-family", "Segoe UI, sans-serif");
+}
+
+function styleValue(el, x, y) {
+  el.position(x, y);
+  el.style("font-size", "15px");
+  el.style("margin", "0");
+  el.style("color", "#333");
+  el.style("font-family", "Segoe UI, sans-serif");
+}
+
 // --- Dibujo principal ---
 function draw() {
   background("#f6f6f6");
   drawStructure();
 
-  // Leer sliders (solo si está detenido)
+  // Leer sliders si no está corriendo
   if (!running) {
     L = lengthSlider.value();
     theta0 = angleSlider.value() * Math.PI / 180;
     mass = massSlider.value();
   }
 
-  // Calcular ángulo
+  // Actualizar valores mostrados
+  lengthValue.html(L.toFixed(2));
+  angleValue.html(degrees(theta0).toFixed(0));
+  massValue.html(mass.toFixed(2));
+
+  // Escala automática
+  pxScale = basePxScale * (2.5 / L);
+  pxScale = constrain(pxScale, 40, 100);
+
+  // Ángulo actual
   let theta = running ? theta0 * Math.cos(Math.sqrt(g / L) * t) : theta0;
 
-  // Posición de la masa
+  // Posición masa
   let x = xSupport + L * pxScale * Math.sin(theta);
   let y = ySupport + L * pxScale * Math.cos(theta);
 
@@ -113,16 +155,7 @@ function draw() {
   // Avanzar tiempo
   if (running) t += dt;
 
-  // Mostrar etiquetas sliders
-  noStroke();
-  fill(30);
-  textSize(14);
-  textAlign(LEFT);
-  text(`Longitud (m): ${L.toFixed(2)}`, 80, height - 165);
-  text(`Ángulo (°): ${degrees(theta0).toFixed(0)}`, 80, height - 125);
-  text(`Masa (kg): ${mass.toFixed(2)}`, 80, height - 85);
-
-  // Mostrar período solo si está corriendo
+  // Mostrar período si está corriendo
   if (running) {
     let T = 2 * Math.PI * Math.sqrt(L / g);
     fill("#2e3b4e");
@@ -138,24 +171,32 @@ function draw() {
   }
 }
 
-// --- Estructura metálica ---
+// --- Estructura metálica con borde negro ---
 function drawStructure() {
   push();
   rectMode(CENTER);
-  noStroke();
 
   // Base inferior
+  noStroke();
   fill("#333");
   rect(width / 2, height - 80, 350, 35, 6);
 
   // Pilar vertical
   fill("#8a8a8a");
+  stroke("#000");
+  strokeWeight(1.5);
   rect(width / 2, ySupport + 260, 20, 520);
 
-  // Brazo superior: solo sobresale hacia la derecha
+  // Brazo superior (solo a la derecha)
   fill("#777");
+  stroke("#000");
+  strokeWeight(1.5);
   rect(width / 2 + 40, ySupport, 160, 12, 3);
 
+  // Pivote
+  noStroke();
+  fill("#444");
+  circle(xSupport, ySupport, 12);
   pop();
 }
 
@@ -164,11 +205,19 @@ function startPendulum() {
   if (!running) {
     running = true;
     t = 0;
+    // Bloquear sliders
+    lengthSlider.attribute("disabled", "");
+    angleSlider.attribute("disabled", "");
+    massSlider.attribute("disabled", "");
   }
 }
 
 function stopPendulum() {
   running = false;
   t = 0;
+  // Desbloquear sliders
+  lengthSlider.removeAttribute("disabled");
+  angleSlider.removeAttribute("disabled");
+  massSlider.removeAttribute("disabled");
 }
 
