@@ -12,7 +12,28 @@
     <div id="canvas-container"></div>
 
     <!-- Contenedor de controles -->
-    <div id="controls"></div>
+    <div id="controls">
+      <div class="slider-row">
+        <label for="lengthSlider">Longitud (m)</label>
+        <input type="range" id="lengthSlider" min="0.5" max="6" step="0.1" value="2.5">
+        <span id="lengthValue">2.50</span>
+      </div>
+      <div class="slider-row">
+        <label for="angleSlider">Ángulo (°)</label>
+        <input type="range" id="angleSlider" min="5" max="90" step="1" value="20">
+        <span id="angleValue">20</span>
+      </div>
+      <div class="slider-row">
+        <label for="massSlider">Masa (kg)</label>
+        <input type="range" id="massSlider" min="0.1" max="5" step="0.1" value="1">
+        <span id="massValue">1.00</span>
+      </div>
+
+      <div id="buttons">
+        <button id="startBtn">Iniciar</button>
+        <button id="stopBtn">Detener</button>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
