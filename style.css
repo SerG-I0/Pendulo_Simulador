@@ -13,11 +13,14 @@ body {
   padding-top: 10px;
 }
 
+#canvas-container {
+  margin-bottom: 20px;
+}
+
 #controls {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px;
 }
 
 .slider-row {
@@ -28,29 +31,45 @@ body {
   margin-bottom: 15px;
 }
 
-.slider-row p {
-  margin: 0;
+.slider-row label {
+  width: 120px;
+  text-align: left;
   font-size: 15px;
-  color: #333;
 }
 
-input[type=range] {
+.slider-row input[type=range] {
   -webkit-appearance: none;
+  width: 350px;
   height: 8px;
   border-radius: 5px;
+  background: #ddd;
 }
 
-input[type=range]::-webkit-slider-thumb {
+.slider-row input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #555;
-  cursor: pointer;
   border: 1px solid #333;
+  cursor: pointer;
+  background: currentColor;
 }
 
-button {
+#lengthSlider { color: #4c72b0; }
+#angleSlider  { color: #55a868; }
+#massSlider   { color: #c44e52; }
+
+.slider-row span {
+  width: 50px;
+  text-align: right;
+  font-size: 15px;
+}
+
+#buttons {
+  margin-top: 10px;
+}
+
+#buttons button {
   background-color: #d9d9d9;
   border: none;
   border-radius: 10px;
@@ -60,6 +79,7 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+#buttons button:hover {
   background-color: #bbbbbb;
 }
+
