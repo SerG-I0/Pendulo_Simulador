@@ -1,24 +1,29 @@
-// --- Constantes físicas ---
-let g = 9.81;
-
-// --- Variables del péndulo ---
-let L = 2.5;
-let theta0 = 20 * Math.PI / 180;
-let mass = 1.0;
+// --- Variables físicas ---
+const g = 9.81;
 
 // --- Estado ---
 let running = false;
 let t = 0;
-let dt = 0.02;
+const dt = 0.02;
 
-// --- Escala y soporte ---
+// --- Canvas y soporte ---
 let xSupport, ySupport;
 let pxScale;
 
-// --- Controles ---
-let lengthSlider, angleSlider, massSlider;
-let startButton, stopButton;
-let lengthValue, angleValue, massValue;
+// --- Referencias sliders y valores ---
+const lengthSlider = document.getElementById("lengthSlider");
+const angleSlider = document.getElementById("angleSlider");
+const massSlider = document.getElementById("massSlider");
+
+const lengthValue = document.getElementById("lengthValue");
+const angleValue = document.getElementById("angleValue");
+const massValue = document.getElementById("massValue");
+
+const startBtn = document.getElementById("startBtn");
+const stopBtn  = document.getElementById("stopBtn");
+
+startBtn.addEventListener("click", startPendulum);
+stopBtn.addEventListener("click", stopPendulum);
 
 function setup() {
   const canvas = createCanvas(700, 900);
@@ -26,83 +31,26 @@ function setup() {
   angleMode(RADIANS);
   noStroke();
 
-  // Ajuste compacto: soporte más alto para que la bola toque la base
-  ySupport = 150; 
+  // Ajuste compacto
+  ySupport = 150;
   xSupport = width / 2 + 70;
-
-  // Crear sliders
-  lengthSlider = createSliderRow("Longitud (m)", 0.5, 6, 2.5, 0.1, "#4c72b0");
-  angleSlider = createSliderRow("Ángulo (°)", 5, 90, 20, 1, "#55a868");
-  massSlider = createSliderRow("Masa (kg)", 0.1, 5, 1, 0.1, "#c44e52");
-
-  // Botones
-  startButton = createButton("Iniciar");
-  startButton.parent("controls");
-  styleButton(startButton);
-  startButton.mousePressed(startPendulum);
-
-  stopButton = createButton("Detener");
-  stopButton.parent("controls");
-  styleButton(stopButton);
-  stopButton.mousePressed(stopPendulum);
 }
 
-// --- Crear fila de slider ---
-function createSliderRow(labelText, min, max, val, step, color) {
-  const container = createDiv().class("slider-row").parent("controls");
-
-  const label = createP(labelText).parent(container);
-  label.style("margin", "0");
-  label.style("font-size", "15px");
-
-  const slider = createSlider(min, max, val, step).parent(container);
-  slider.style("width", "350px");
-  slider.style("accent-color", color); 
-  slider.style("background-color", "transparent");
-
-  const valueP = createP(val.toFixed(2)).parent(container);
-  valueP.style("margin", "0");
-  valueP.style("font-size", "15px");
-
-  // Guardar referencias
-  if (labelText.includes("Longitud")) lengthValue = valueP;
-  if (labelText.includes("Ángulo")) angleValue = valueP;
-  if (labelText.includes("Masa")) massValue = valueP;
-
-  return slider;
-}
-
-// --- Estilos botón ---
-function styleButton(btn) {
-  btn.style("background-color", "#d9d9d9");
-  btn.style("border", "none");
-  btn.style("border-radius", "10px");
-  btn.style("padding", "8px 18px");
-  btn.style("font-size", "16px");
-  btn.style("margin", "5px");
-  btn.style("cursor", "pointer");
-  btn.mouseOver(() => btn.style("background-color", "#bbbbbb"));
-  btn.mouseOut(() => btn.style("background-color", "#d9d9d9"));
-}
-
-// --- Dibujo ---
 function draw() {
   background("#f6f6f6");
   drawStructure();
 
-  if (!running) {
-    L = lengthSlider.value();
-    theta0 = angleSlider.value() * Math.PI / 180;
-    mass = massSlider.value();
-  }
+  // Leer valores
+  let L = parseFloat(lengthSlider.value);
+  let theta0 = parseFloat(angleSlider.value) * Math.PI / 180;
+  let mass = parseFloat(massSlider.value);
 
-  // Actualizar valores
-  lengthValue.html(L.toFixed(2));
-  angleValue.html(degrees(theta0).toFixed(0));
-  massValue.html(mass.toFixed(2));
+  lengthValue.textContent = L.toFixed(2);
+  angleValue.textContent = angleSlider.value;
+  massValue.textContent = mass.toFixed(2);
 
-  // Escala vertical ajustada
-  pxScale = (height - 300 - 20) / 6; 
+  // Escala vertical automática
+  pxScale = (height - 300 - 20) / 6; // 6 m máximo, 20 px margen
 
   let theta = running ? theta0 * Math.cos(Math.sqrt(g / L) * t) : theta0;
 
@@ -114,7 +62,7 @@ function draw() {
   strokeWeight(2.4);
   line(xSupport, ySupport, x, y);
 
-  // Masa
+  // Bola
   noStroke();
   let r = 10 * Math.sqrt(mass);
   fill("#7b1e26");
@@ -142,7 +90,6 @@ function draw() {
   }
 }
 
-// --- Estructura ---
 function drawStructure() {
   push();
   rectMode(CENTER);
@@ -172,23 +119,22 @@ function drawStructure() {
   pop();
 }
 
-// --- Control ---
 function startPendulum() {
   if (!running) {
     running = true;
     t = 0;
-    lengthSlider.attribute("disabled", "");
-    angleSlider.attribute("disabled", "");
-    massSlider.attribute("disabled", "");
+    lengthSlider.disabled = true;
+    angleSlider.disabled = true;
+    massSlider.disabled = true;
   }
 }
 
 function stopPendulum() {
   running = false;
   t = 0;
-  lengthSlider.removeAttribute("disabled");
-  angleSlider.removeAttribute("disabled");
-  massSlider.removeAttribute("disabled");
+  lengthSlider.disabled = false;
+  angleSlider.disabled = false;
+  massSlider.disabled = false;
 }
 
 
