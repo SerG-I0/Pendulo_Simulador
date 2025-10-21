@@ -1,7 +1,7 @@
 body {
   text-align: center;
   background: #f6f6f6;
-  font-family: sans-serif;
+  font-family: "Segoe UI", sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -9,33 +9,7 @@ body {
 h1 {
   color: #333;
   margin-top: 1em;
-}
-
-#controls {
-  margin: 1em auto;
-  width: 80%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6em;
-  align-items: center;
-}
-
-input[type="range"] {
-  width: 200px;
-}
-
-#buttons button {
-  margin: 0.3em;
-  padding: 0.5em 1em;
-  border: none;
-  border-radius: 8px;
-  background: #d9d9d9;
-  cursor: pointer;
-  font-size: 1em;
-}
-
-#buttons button:hover {
-  background: #bbb;
+  margin-bottom: 0.5em;
 }
 
 canvas {
@@ -43,4 +17,13 @@ canvas {
   margin: 0 auto;
   background: #f6f6f6;
   border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+input[type="range"] {
+  accent-color: #4c72b0;
+}
+
+button {
+  font-family: inherit;
 }
