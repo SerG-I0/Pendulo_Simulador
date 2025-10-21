@@ -1,12 +1,12 @@
 // --- Constantes físicas ---
 let g = 9.81;
 
-// --- Variables del sistema ---
+// --- Variables del péndulo ---
 let L = 2.5;
 let theta0 = 20 * Math.PI / 180;
 let mass = 1.0;
 
-// --- Estado de simulación ---
+// --- Estado ---
 let running = false;
 let t = 0;
 let dt = 0.02;
@@ -19,11 +19,11 @@ let pxScale;
 // --- Controles ---
 let lengthSlider, angleSlider, massSlider;
 let startButton, stopButton;
-let lengthLabel, angleLabel, massLabel;
 let lengthValue, angleValue, massValue;
 
 function setup() {
-  createCanvas(700, 900);
+  const canvas = createCanvas(700, 900);
+  canvas.parent("canvas-container");
   angleMode(RADIANS);
   noStroke();
 
@@ -31,69 +31,40 @@ function setup() {
   xSupport = width / 2 + 70;
   ySupport = 180;
 
-  // Posición y tamaño de los sliders
-  let baseY = 550;  // debajo del péndulo
-  let sliderWidth = 350;
+  // Crear sliders con labels y valores en contenedor
+  lengthSlider = createSliderRow("Longitud (m)", 0.5, 6, 2.5, 0.1, "#4c72b0");
+  angleSlider = createSliderRow("Ángulo (°)", 5, 90, 20, 1, "#55a868");
+  massSlider = createSliderRow("Masa (kg)", 0.1, 5, 1, 0.1, "#c44e52");
 
-  // ---- Contenedor dinámico de sliders para mejor alineación ----
-  createSliderRow("Longitud (m)", 0.5, 6, 2.5, 0.1, "#4c72b0", baseY);
-  createSliderRow("Ángulo (°)", 5, 90, 20, 1, "#55a868", baseY + 60);
-  createSliderRow("Masa (kg)", 0.1, 5, 1, 0.1, "#c44e52", baseY + 120);
-
-  // --- Botones ---
+  // Botones
   startButton = createButton("Iniciar");
-  startButton.position(width / 2 - 130, baseY + 180);
-  styleButton(startButton);
+  startButton.parent("controls");
   startButton.mousePressed(startPendulum);
 
   stopButton = createButton("Detener");
-  stopButton.position(width / 2 + 20, baseY + 180);
-  styleButton(stopButton);
+  stopButton.parent("controls");
   stopButton.mousePressed(stopPendulum);
 }
 
-// --- Crear fila de slider con label y valor ---
-function createSliderRow(labelText, min, max, val, step, color, yPos) {
-  let label = createP(labelText);
-  label.style("margin", "0");
-  label.style("font-size", "15px");
-  label.style("color", "#333");
-  label.style("font-family", "Segoe UI, sans-serif");
-  label.position(width / 2 - 250, yPos - 5);
+function createSliderRow(labelText, min, max, val, step, color) {
+  const container = createDiv().class("slider-row").parent("controls");
 
-  let slider = createSlider(min, max, val, step);
-  slider.position(width / 2 - 50, yPos);
-  slider.style("width", "350px");
+  const label = createP(labelText).parent(container);
+  const slider = createSlider(min, max, val, step).parent(container);
   slider.style("accent-color", color);
   slider.style("background-color", "white");
   slider.style("padding", "2px");
 
-  let valueP = createP(val.toFixed(2));
-  valueP.style("margin", "0");
-  valueP.style("font-size", "15px");
-  valueP.style("color", "#333");
-  valueP.style("font-family", "Segoe UI, sans-serif");
-  valueP.position(width / 2 + 320, yPos - 5);
+  const valueP = createP(val.toFixed(2)).parent(container);
 
-  // Guardar referencias
-  if (labelText.includes("Longitud")) { lengthSlider = slider; lengthValue = valueP; }
-  if (labelText.includes("Ángulo")) { angleSlider = slider; angleValue = valueP; }
-  if (labelText.includes("Masa")) { massSlider = slider; massValue = valueP; }
+  // Guardar referencia al valor para actualizarlo
+  if (labelText.includes("Longitud")) lengthValue = valueP;
+  if (labelText.includes("Ángulo")) angleValue = valueP;
+  if (labelText.includes("Masa")) massValue = valueP;
+
+  return slider;
 }
 
-// --- Estilos de botones ---
-function styleButton(btn) {
-  btn.style("background-color", "#d9d9d9");
-  btn.style("border", "none");
-  btn.style("border-radius", "10px");
-  btn.style("padding", "8px 18px");
-  btn.style("cursor", "pointer");
-  btn.style("font-size", "16px");
-  btn.mouseOver(() => btn.style("background-color", "#bbbbbb"));
-  btn.mouseOut(() => btn.style("background-color", "#d9d9d9"));
-}
-
-// --- Dibujo principal ---
 function draw() {
   background("#f6f6f6");
   drawStructure();
@@ -104,7 +75,7 @@ function draw() {
     mass = massSlider.value();
   }
 
-  // Actualizar valores mostrados
+  // Actualizar valores
   lengthValue.html(L.toFixed(2));
   angleValue.html(degrees(theta0).toFixed(0));
   massValue.html(mass.toFixed(2));
@@ -118,12 +89,12 @@ function draw() {
   let x = xSupport + L * pxScale * Math.sin(theta);
   let y = ySupport + L * pxScale * Math.cos(theta);
 
-  // Dibujar cuerda
+  // Cuerda
   stroke(90);
   strokeWeight(2.4);
   line(xSupport, ySupport, x, y);
 
-  // Dibujar masa
+  // Masa
   noStroke();
   let r = 10 * Math.sqrt(mass);
   fill("#7b1e26");
@@ -135,7 +106,7 @@ function draw() {
 
   if (running) t += dt;
 
-  // Cartel período
+  // Período
   if (running) {
     let T = 2 * Math.PI * Math.sqrt(L / g);
     fill("#2e3b4e");
@@ -151,7 +122,6 @@ function draw() {
   }
 }
 
-// --- Estructura metálica ---
 function drawStructure() {
   push();
   rectMode(CENTER);
@@ -177,10 +147,10 @@ function drawStructure() {
   noStroke();
   fill("#444");
   circle(xSupport, ySupport, 12);
+
   pop();
 }
 
-// --- Controladores ---
 function startPendulum() {
   if (!running) {
     running = true;
@@ -198,3 +168,4 @@ function stopPendulum() {
   angleSlider.removeAttribute("disabled");
   massSlider.removeAttribute("disabled");
 }
+
